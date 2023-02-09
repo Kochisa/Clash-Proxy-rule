@@ -1,4 +1,7 @@
-DOMAIN-SUFFIX,kemono.party
-DOMAIN-SUFFIX,coose.party
-DOMAIN-SUFFIX,kemono.party
-DOMAIN-SUFFIX,kemono.party
+#赞助下载站
+DOMAIN-KEYWORD,kemono
+DOMAIN-KEYWORD,coose.party
+#论坛
+DOMAIN-KEYWORD,zodgame
+DOMAIN-KEYWORD,south-plus
+DOMAIN-KEYWORD,gmgard
