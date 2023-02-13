@@ -1,5 +1,3 @@
 # 内容：Sina
 # 数量：14条
-DOMAIN-SUFFIX,reward.media.weibo.com
-DOMAIN-SUFFIX,rm.api.weibo.com
-DOMAIN-SUFFIX,i.sso.sina.com.cn
+DOMAIN-SUFFIX,weibo.com
