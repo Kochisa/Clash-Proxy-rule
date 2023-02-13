@@ -2,3 +2,6 @@
 # 数量：14条
 DOMAIN-SUFFIX,weibo.com
 DOMAIN-SUFFIX,weibo.cn
+DOMAIN-SUFFIX,s.weibo.cn
+DOMAIN-SUFFIX,rm.api.weibo.com
+DOMAIN-SUFFIX,rum.h5.weibo.cn
