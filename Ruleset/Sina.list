@@ -5,8 +5,8 @@
 # DOMAIN-SUFFIX,sina.com.cn
 # DOMAIN-SUFFIX,sinaapp.cn
 # DOMAIN-SUFFIX,sinaapp.com
-# DOMAIN-SUFFIX,sinaimg.cn
-# DOMAIN-SUFFIX,sinaimg.com
+DOMAIN-SUFFIX,sinaimg.cn
+DOMAIN-SUFFIX,sinaimg.com
 DOMAIN-SUFFIX,weibo.cn
 DOMAIN-SUFFIX,weibo.com
 # DOMAIN-SUFFIX,weibocdn.cn
