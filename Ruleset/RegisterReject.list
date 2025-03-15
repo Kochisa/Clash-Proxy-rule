@@ -35,4 +35,4 @@ DOMAIN-SUFFIX,verisign.com
 DOMAIN-SUFFIX,worldsecuresystems.com
 DOMAIN-KEYWORD,registeridm
 DOMAIN-KEYWORD,tonec
-DOMAIN-KEYWORD,internetdownloadmanager
+#DOMAIN-KEYWORD,internetdownloadmanager
