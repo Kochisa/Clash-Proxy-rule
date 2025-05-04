@@ -7,3 +7,14 @@ DOMAIN-SUFFIX,hub5pnc.sandai.net
 DOMAIN-SUFFIX,hub5pr.v6.phub.sandai.net
 DOMAIN-SUFFIX,hubciddata.sandai.net
 DOMAIN-KEYWORD,mypikpak
+DOMAIN-KEYWORD,pikpak
+DOMAIN-SUFFIX,info.mypikpak.com
+DOMAIN-SUFFIX,api-drive.mypikpak.com
+DOMAIN-SUFFIX,user.pikpakdrive.com
+DOMAIN-SUFFIX,rcv5-sp.mypikpak.com
+DOMAIN-SUFFIX,user.mypikpak.com
+DOMAIN-SUFFIX,config.mypikpak.com
+DOMAIN-SUFFIX,access.mypikpak.com
+DOMAIN-SUFFIX,access.pikpakdrive.com
+DOMAIN-SUFFIX,access.mypikpak.net
+DOMAIN-SUFFIX,access.pikpak.me
