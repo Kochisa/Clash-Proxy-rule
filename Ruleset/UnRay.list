@@ -2,4 +2,4 @@
 DOMAIN-KEYWORD,zerotier
 DOMAIN-KEYWORD,tailscale
 DOMAIN-SUFFIX,ikaro.su
-DOMAIN,dl-*.mypikpak.com
+DOMAIN-REGEX,^dl-[a-zA-Z0-9\-]+\.mypikpak\.com
