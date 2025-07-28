@@ -1,0 +1,290 @@
+proxy-providers:
+  # 节点订阅提供者定义
+  Airport1:
+    url: "https://link"  # 订阅链接
+    type: http
+    interval: 86400  # 每24小时更新一次
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204  # 用于健康检查的 URL
+      interval: 300  # 健康检查间隔5分钟
+    proxy: 直连  # 健康检查请求使用的出口
+    #override:
+      #additional-prefix: "前缀 |"
+      #additional-suffix: "| 后缀"
+
+proxies:
+  # 内建两个基础代理
+  - {name: 直连, type: direct}  # 直连不经过代理
+  - {name: 拒绝, type: reject}  # 拒绝连接
+
+# 主要监听端口设置
+port: 7890  # HTTP代理端口
+socks-port: 7891  # SOCKS代理端口
+redir-port: 7892  # REDIR模式端口
+mixed-port: 7893  # 混合端口（HTTP+SOCKS）
+tproxy-port: 7895  # TProxy透明代理端口
+
+# 全局基础配置
+allow-lan: true  # 是否允许局域网设备连接
+mode: rule  # 模式：rule（规则）
+log-level: info  # 日志级别
+bind-address: "*"  # 绑定所有IP地址
+ipv6: false  # 是否启用IPv6
+unified-delay: true  # 延迟统一计算
+tcp-concurrent: true  # 启用TCP并发连接
+find-process-mode: 'off'  # 不进行进程识别
+global-client-fingerprint: chrome  # 设置客户端指纹为chrome
+keep-alive-idle: 600
+keep-alive-interval: 15
+disable-keep-alive: false
+
+# 外部控制面板配置
+external-controller: 0.0.0.0:9090  # 控制端口
+external-ui: ui  # UI目录名
+external-ui-name: zashboard
+external-ui-url: https://gh-proxy.com/github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip  # UI下载地址
+secret: '1145141919'  # 授权密码
+authentication:
+  - nikki:1145141919  # 用户名密码认证
+
+# DNS 设置
+dns:
+  enable: true
+  listen: 0.0.0.0:7874  # DNS服务监听地址
+  ipv6: false
+#  respect-rules: true
+  enhanced-mode: fake-ip  # 启用 Fake-IP 模式
+  fake-ip-range: 198.20.0.1/16  # Fake IP 网段
+  fake-ip-filter-mode: blacklist  # 黑名单方式
+  fake-ip-filter:
+    - +.lan
+    - +.local
+    - geosite:cn
+    - +.ikaro.su
+
+  default-nameserver:
+    - 223.5.5.5
+    - 223.6.6.6
+  proxy-server-nameserver:
+    - https://223.5.5.5/dns-query
+    - https://223.6.6.6/dns-query
+  nameserver:
+    - https://223.5.5.5/dns-query
+    - https://223.6.6.6/dns-query
+
+# 嗅探器配置
+sniffer:
+  enable: true  # 根据流量自动识别域名
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]  # 针对 HTTP 协议进行嗅探的端口范围
+      override-destination: true  # 启用后会替换目标地址为嗅探到的地址
+    TLS:
+      ports: [443, 8443]  # TLS 嗅探端口
+    QUIC:
+      ports: [443, 8443]  # QUIC 嗅探端口
+  force-domain:
+    - "+.v2ex.com"  # 对该域名强制进行嗅探（即便其在 skip 列表中）
+  skip-domain:
+    - "+.baidu.com"  # 对该域名跳过嗅探处理
+    - "+.ikaro.su"  # 对该域名跳过嗅探处理
+
+# TUN 模块
+tun:
+  enable: true  # 启用 TUN 模式（适用于系统全局透明代理）
+  stack: gvisor  # 混合栈，兼容 macOS 和 Linux
+  device: utun  # 虚拟网卡设备名（在 macOS 上为 utun，Linux 可为 tun）
+  endpoint-independent-nat: true  # 启用 NAT 独立端点
+  auto-route: false  # 自动添加路由规则
+  auto-detect-interface: false  # 自动识别出口网卡
+  auto-redirect: false  # 自动启用透明代理转发
+  strict-route: false  # 开启严格路由策略，阻止数据包泄漏
+
+profile:
+  store-selected: true  # 记住上次选中的策略节点
+  store-fake-ip: true  # 记住上次 fake-ip 映射记录，减少重启后 DNS 异常
+
+# 策略组定义
+default: &default
+  type: select  # 策略类型为 select，手动或自动在多个代理中选择
+  proxies:
+    - 直连  # 直接连接（不经过代理）
+    - 拒绝  # 拒绝连接
+    - 🇭🇰 香港节点  # 指向香港地区的代理集合
+    - 🇯🇵 日本节点
+    - 🇸🇬 狮城节点
+    - 🇨🇳 台湾节点
+    - 🇰🇷 韩国节点
+    - 🇺🇲 美国节点
+    - 🔯 香港故转  # 故障切换组，通常为备用香港节点
+    - 🔯 日本故转
+    - 🔯 狮城故转
+    - 🔯 台湾故转
+    - 🔯 韩国故转
+    - 🔯 美国故转
+
+
+proxy-groups:
+  # 业务分流组
+  - {name: 🚀 默认代理, <<: *default}  # 默认所有未匹配规则的流量走该组策略
+  - {name: 📹 视频解锁, type: select, proxies: [直连, 拒绝, 🔯 视频故转]}  # 视频类服务的解锁策略（如 Netflix、Disney+）
+  - {name: 📹 YouTube, <<: *default}  # 专为 YouTube 流量提供的代理策略选择组
+  - {name: 🤖 ChatGPT, <<: *default}  # OpenAI 等 AI 服务流量的代理策略
+  - {name: 📲 Telegram, <<: *default}  # Telegram 即时通讯流量
+  - {name: 🐬 OneDrive, <<: *default}  # 微软 OneDrive 云服务流量
+  - {name: 🪟 Microsoft, <<: *default}  # Microsoft 相关服务（如更新、激活等）
+  - {name: 🌍 国外媒体, <<: *default}  # 国外主流媒体服务，如 YouTube、Netflix
+  - {name: 🌏 国内媒体, <<: *default}  # 国内主流媒体服务，如爱奇艺、腾讯视频
+  - {name: 🎮 游戏平台, <<: *default}  # Steam、Origin、PSN 等游戏平台
+  - {name: 🌈 自定义HK, <<: *default}  # 自定义使用香港节点的规则流量
+  - {name: 🌈 自定义JP, <<: *default}  # 自定义使用日本节点的规则流量
+  - {name: 💾 全赞助站, <<: *default}  # 赞助下载站点（BT/PT等）
+  - {name: 🚾 新浪微博, <<: *default}  # 特别针对微博等特定站点的分流策略
+  - {name: 📺 哔哩哔哩, <<: *default}  # 哔哩哔哩视频流量策略组
+  - {name: 🐟 漏网之鱼, <<: *default}  # 所有未被规则命中的“漏网”流量
+  - {name: 🎯 直连, type: select, proxies: [直连, 拒绝, 🚀 默认代理]}  # 强制直连或转代理的选择
+  - {name: 🛑 广告拦截, type: select, proxies: [直连, 拒绝, 🚀 默认代理]}  # 广告流量处理策略组
+  - {name: 🍃 应用净化, type: select, proxies: [直连, 拒绝, 🚀 默认代理]}  # 用于屏蔽追踪器、分析服务等背景应用通信
+
+# 所有组（用于节点筛选与策略分流）
+  # 地区选择策略组（可用于手动选择节点）
+  - {name: 🇭🇰 香港节点, type: select, include-all: true, filter: "(?i)港|hk|hongkong|hong kong"}  # 包含“香港”等关键词的节点
+  - {name: 🇯🇵 日本节点, type: select, include-all: true, filter: "(?i)日本|jp|japan"}              # 包含“日本”等关键词的节点
+  - {name: 🇸🇬 狮城节点, type: select, include-all: true, filter: "(?i)新加坡|狮城|SG|Singapore"}    # 包含“新加坡”等关键词的节点
+  - {name: 🇨🇳 台湾节点, type: select, include-all: true, filter: "(?i)台|TW|Taiwan"}               # 包含“台湾”等关键词的节点
+  - {name: 🇰🇷 韩国节点, type: select, include-all: true, filter: "(?i)韩|KR|Korea|首尔"}           # 包含“韩国”等关键词的节点
+  - {name: 🇺🇲 美国节点, type: select, include-all: true, filter: "(?i)美|us|unitedstates|united states"}  # 包含“美国”等关键词的节点
+
+  # 各地区节点的故障转移组，优先使用延迟最低可用节点
+  - {name: 🔯 香港故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(港|hk|hongkong|hong kong)"}
+  - {name: 🔯 日本故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(日本|jp|japan)"}
+  - {name: 🔯 狮城故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(新加坡|狮城|SG|Singapore)"}
+  - {name: 🔯 台湾故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(台|TW|Taiwan)"}
+  - {name: 🔯 韩国故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(韩|KR|Korea|首尔)"}
+  - {name: 🔯 美国故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(美|us|unitedstates|united states)"}
+
+  # 视频平台专用容灾（奈飞、DMM等）
+  - {name: 🔯 视频故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(NF|奈飞|解锁|Netflix|Media|DMM|流媒体)"}
+
+
+# 规则引擎（rules）
+rules:
+  - DOMAIN-SUFFIX,qichiyu.com,🚀 默认代理
+  - RULE-SET,private_domain,🎯 直连
+  - RULE-SET,UnRay,🎯 直连
+  - RULE-SET,PublicDirectCDN,🎯 直连
+  - RULE-SET,GoogleCN,🎯 直连
+  - RULE-SET,SteamCN,🎯 直连
+  - RULE-SET,proxylite,🚀 默认代理
+  - RULE-SET,ai,🤖 ChatGPT
+  - RULE-SET,github_domain,🚀 默认代理
+  - RULE-SET,youtube_domain,📹 YouTube
+  - RULE-SET,google_domain,🚀 默认代理
+  - RULE-SET,onedrive_domain,🐬 OneDrive
+  - RULE-SET,microsoft_domain,🪟 Microsoft
+  - RULE-SET,tiktok_domain,🌍 国外媒体
+  - RULE-SET,twitter,🌍 国外媒体
+  - RULE-SET,twitch,🌍 国外媒体
+  - RULE-SET,spotify,🌍 国外媒体
+  - RULE-SET,reddit,🌍 国外媒体
+  - RULE-SET,instagram,🌍 国外媒体
+  - RULE-SET,discord,🌍 国外媒体
+  - RULE-SET,Resource,🌍 国外媒体
+  - RULE-SET,pixiv,🌍 国外媒体
+  - RULE-SET,Pornhub,🌍 国外媒体
+  - RULE-SET,telegram_domain,📲 Telegram
+  - RULE-SET,Kemono,💾 全赞助站
+  - RULE-SET,Sina,🚾 新浪微博
+  - RULE-SET,bilibili,📺 哔哩哔哩
+  - RULE-SET,HK,🌈 自定义HK
+  - RULE-SET,Porn,🌈 自定义HK
+  - RULE-SET,Docker,🌈 自定义HK
+  - RULE-SET,JP,🌈 自定义JP
+  - RULE-SET,Dmm,🌈 自定义JP
+  - RULE-SET,Dmm-pron,🌈 自定义JP
+  - RULE-SET,Niconico,🌈 自定义JP
+  - RULE-SET,steam,🎮 游戏平台
+  - RULE-SET,epicgames,🎮 游戏平台
+  - RULE-SET,origin,🎮 游戏平台
+  - RULE-SET,nintendo,🎮 游戏平台
+  - RULE-SET,sony,🎮 游戏平台
+  - RULE-SET,xbox,🎮 游戏平台
+  - RULE-SET,hoyoverse,🎮 游戏平台
+  - RULE-SET,netflix_domain,📹 视频解锁
+  - RULE-SET,gfw_domain,🚀 默认代理
+  - RULE-SET,geolocation-!cn,🚀 默认代理
+  - RULE-SET,cn_domain,🎯 直连
+  - RULE-SET,google_ip,🚀 默认代理,no-resolve
+  - RULE-SET,netflix_ip,📹 视频解锁,no-resolve
+  - RULE-SET,telegram_ip,📲 Telegram,no-resolve
+  - RULE-SET,cn_ip,🎯 直连,no-resolve
+  - RULE-SET,BanAD,🛑 广告拦截
+  - RULE-SET,BanProgramAD,🍃 应用净化
+  - MATCH,🐟 漏网之鱼
+  - IP-CIDR,192.168.0.0/16,直连,no-resolve
+  - IP-CIDR,10.0.0.0/8,直连,no-resolve
+  - IP-CIDR,172.16.0.0/12,直连,no-resolve
+  - DOMAIN-SUFFIX,lan,直连
+
+# 规则集提供者
+rule-anchor:
+  ip: &ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}       # IP段规则，用于匹配 CIDR 地址段（更新周期为每日）
+  domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}  # 域名规则，匹配域名用
+  class: &class {type: http, interval: 86400, behavior: classical, format: text} # 传统规则格式，主要用于关键字/正则匹配
+
+rule-providers: 
+  private_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs"}
+  proxylite: { <<: *class, url: "https://raw.githubusercontent.com/qichiyuhub/rule/refs/heads/main/proxy.list"}
+  UnRay: { <<: *class, url: "https://raw.githubusercontent.com/Kochisa/Clash-Proxy-rule/main/Ruleset/UnRay.list" }
+  PublicDirectCDN: { <<: *class, url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/PublicDirectCDN.list" }
+  GoogleCN: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/google@cn.mrs" }
+  SteamCN: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/steam@cn.mrs" }
+  ai: {  <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-ai-!cn.mrs" }
+  youtube_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"}
+  google_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs"}
+  github_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/github.mrs"}
+  telegram_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"}
+  netflix_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs"}
+  onedrive_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/onedrive.mrs"}
+  microsoft_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs"}
+  apple_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple-cn.mrs"}
+  tiktok_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"}
+  twitter: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/twitter.mrs" }
+  twitch: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/twitch.mrs" }
+  spotify: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/spotify.mrs" }
+  reddit: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/reddit.mrs" }
+  instagram: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/instagram.mrs" }
+  discord: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/discord.mrs" }
+  Resource: { <<: *class, url: "https://raw.githubusercontent.com/Kochisa/Clash-Proxy-rule/main/Ruleset/Resource.list" }
+  pixiv: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/pixiv.mrs" }
+  Pornhub: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/pornhub.mrs" }
+  gfw_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/gfw.mrs"}
+  geolocation-!cn: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs"}
+  Kemono: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/kemono.mrs" }
+  Sina: { <<: *class, url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Sina.list" }
+  bilibili: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/bilibili.mrs" }
+  HK: { <<: *class, url: "https://raw.githubusercontent.com/Kochisa/Clash-Proxy-rule/main/Ruleset/HK.list" }
+  Porn: { <<: *class, url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Porn.list" }
+  Docker: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/docker.mrs" }
+  JP: { <<: *class, url: "https://raw.githubusercontent.com/Kochisa/Clash-Proxy-rule/main/Ruleset/JP.list" }
+  Dmm: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/dmm.mrs" }
+  Dmm-pron: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/dmm-porn.mrs" }
+  Niconico: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/niconico.mrs" }
+  steam: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/steam.mrs" }
+  epicgames: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/epicgames.mrs" }
+  origin: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/origin.mrs" }
+  nintendo: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/nintendo.mrs" }
+  sony: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/sony.mrs" }
+  xbox: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/xbox.mrs" }
+  hoyoverse: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/hoyoverse.mrs" }
+  cn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"}
+  cn_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs"}
+  google_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/google.mrs"}
+  telegram_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"}
+  netflix_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs"}
+  BanAD: { <<: *class, url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list" }
+  BanProgramAD: { <<: *class, url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list" }
