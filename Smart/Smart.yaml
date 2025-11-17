@@ -1,14 +1,14 @@
 proxy-providers:
   # 节点订阅提供者定义
   Airport1:
-    url: "https://link"  # 订阅链接
+    url: "https://"  # 订阅链接
     type: http
     interval: 86400  # 每24小时更新一次
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204  # 用于健康检查的 URL
       interval: 300  # 健康检查间隔5分钟
-    proxy: 直连  # 健康检查请求使用的出口
+    proxy: "⭐ 订阅节点"  # <-- 这里强制订阅请求走指定节点
     #override:
       #additional-prefix: "前缀 |"
       #additional-suffix: "| 后缀"
@@ -114,12 +114,6 @@ default: &default
   proxies:
     - 直连  # 直接连接（不经过代理）
     - 拒绝  # 拒绝连接
-    - 🇭🇰 香港节点  # 指向香港地区的代理集合
-    - 🇯🇵 日本节点
-    - 🇸🇬 狮城节点
-    - 🇨🇳 台湾节点
-    - 🇰🇷 韩国节点
-    - 🇺🇲 美国节点
     - 🔯 香港故转  # 故障切换组，通常为备用香港节点
     - 🔯 日本故转
     - 🔯 狮城故转
@@ -129,84 +123,89 @@ default: &default
     - ♻️ 香港ECO均衡  # 均衡负载策略组（ECO 意指经济模式）
     - ♻️ 香港ECO智能  # 智能测速选择最快香港 ECO 节点
     - ♻️ 香港普通智能  # 普通测速选择最快香港节点
-    - ♻️ 香港游戏智能  # 针对游戏优化的香港节点选择
+    - ♻️ 全球游戏智能  # 针对游戏优化的香港节点选择
     - ♻️ 日本普通智能
     - ♻️ 狮城普通智能
+    - ♻️ 台湾普通智能
+    - ♻️ 韩国普通智能
     - ♻️ 美国普通智能
 
 
 proxy-groups:
   # 业务分流组
   - {name: 🚀 默认代理, <<: *default}  # 默认所有未匹配规则的流量走该组策略
-  - {name: 📹 视频解锁, type: select, proxies: [直连, 拒绝, 🔯 视频故转, ♻️ 香港ECO均衡, ♻️ 香港ECO智能, ♻️ 香港普通智能, ♻️ 香港游戏智能, ♻️ 日本普通智能, ♻️ 狮城普通智能, ♻️ 美国普通智能]}  # 视频类服务的解锁策略（如 Netflix、Disney+）
-  - {name: 📹 YouTube, <<: *default}  # 专为 YouTube 流量提供的代理策略选择组
-  - {name: 🤖 ChatGPT, <<: *default}  # OpenAI 等 AI 服务流量的代理策略
-  - {name: 📲 Telegram, <<: *default}  # Telegram 即时通讯流量
-  - {name: 🐬 OneDrive, <<: *default}  # 微软 OneDrive 云服务流量
-  - {name: 🪟 Microsoft, <<: *default}  # Microsoft 相关服务（如更新、激活等）
-  - {name: 🌍 国外媒体, <<: *default}  # 国外主流媒体服务，如 YouTube、Netflix
-  - {name: 🌏 国内媒体, <<: *default}  # 国内主流媒体服务，如爱奇艺、腾讯视频
-  - {name: 🎮 游戏平台, <<: *default}  # Steam、Origin、PSN 等游戏平台
-  - {name: 🌈 自定义HK, <<: *default}  # 自定义使用香港节点的规则流量
-  - {name: 🌈 自定义JP, <<: *default}  # 自定义使用日本节点的规则流量
-  - {name: 💾 全赞助站, <<: *default}  # 赞助下载站点（BT/PT等）
-  - {name: 🚾 新浪微博, <<: *default}  # 特别针对微博等特定站点的分流策略
-  - {name: 📺 哔哩哔哩, <<: *default}  # 哔哩哔哩视频流量策略组
-  - {name: 🐟 漏网之鱼, <<: *default}  # 所有未被规则命中的“漏网”流量
+  - {name: 📹 视频解锁, type: select, proxies: [直连, 拒绝, 🚀 默认代理, 🔯 视频故转]}  # 视频类服务的解锁策略（如 Netflix、Disney+）
+  - {name: 📹 YouTube, <<: *default, proxies+: [🚀 默认代理]}  # 专为 YouTube 流量提供的代理策略选择组
+  - {name: 🤖 ChatGPT, <<: *default, proxies+: [🚀 默认代理]}  # OpenAI 等 AI 服务流量的代理策略
+  - {name: 📲 Telegram, <<: *default, proxies+: [🚀 默认代理]}  # Telegram 即时通讯流量
+  - {name: 🐬 OneDrive, <<: *default, proxies+: [🚀 默认代理]}  # 微软 OneDrive 云服务流量
+  - {name: 🪟 Microsoft, <<: *default, proxies+: [🚀 默认代理]}  # Microsoft 相关服务（如更新、激活等）
+  - {name: 🌍 国外媒体, <<: *default, proxies+: [🚀 默认代理]}  # 国外主流媒体服务，如 YouTube、Netflix
+  - {name: 🌏 国内媒体, <<: *default, proxies+: [🚀 默认代理]}  # 国内主流媒体服务，如爱奇艺、腾讯视频
+  - {name: 🎮 游戏平台, <<: *default, proxies+: [🚀 默认代理]}  # Steam、Origin、PSN 等游戏平台
+  - {name: 🌈 自定义HK, <<: *default, proxies+: [🚀 默认代理]} # 自定义使用香港节点的规则流量
+  - {name: 🌈 自定义JP, <<: *default, proxies+: [🚀 默认代理]}  # 自定义使用日本节点的规则流量
+  - {name: 💾 全赞助站, <<: *default, proxies+: [🚀 默认代理]}  # 赞助下载站点（BT/PT等）
+  - {name: 🚾 新浪微博, <<: *default, proxies+: [🚀 默认代理]}  # 特别针对微博等特定站点的分流策略
+  - {name: 📺 哔哩哔哩, <<: *default, proxies+: [🚀 默认代理]}  # 哔哩哔哩视频流量策略组
+  - {name: 🐟 漏网之鱼, <<: *default, proxies+: [🚀 默认代理]}  # 所有未被规则命中的“漏网”流量
   - {name: 🎯 直连, type: select, proxies: [直连, 拒绝, 🚀 默认代理]}  # 强制直连或转代理的选择
   - {name: 🛑 广告拦截, type: select, proxies: [直连, 拒绝, 🚀 默认代理]}  # 广告流量处理策略组
   - {name: 🍃 应用净化, type: select, proxies: [直连, 拒绝, 🚀 默认代理]}  # 用于屏蔽追踪器、分析服务等背景应用通信
 
 # 所有组（用于节点筛选与策略分流）
   # 地区选择策略组（可用于手动选择节点）
-  - {name: 🇭🇰 香港节点, type: select, include-all: true, filter: "(?i)港|hk|hongkong|hong kong"}  # 包含“香港”等关键词的节点
-  - {name: 🇯🇵 日本节点, type: select, include-all: true, filter: "(?i)日本|jp|japan"}              # 包含“日本”等关键词的节点
-  - {name: 🇸🇬 狮城节点, type: select, include-all: true, filter: "(?i)新加坡|狮城|SG|Singapore"}    # 包含“新加坡”等关键词的节点
-  - {name: 🇨🇳 台湾节点, type: select, include-all: true, filter: "(?i)台|TW|Taiwan"}               # 包含“台湾”等关键词的节点
-  - {name: 🇰🇷 韩国节点, type: select, include-all: true, filter: "(?i)韩|KR|Korea|首尔"}           # 包含“韩国”等关键词的节点
-  - {name: 🇺🇲 美国节点, type: select, include-all: true, filter: "(?i)美|us|unitedstates|united states"}  # 包含“美国”等关键词的节点
+  - {name: ⭐ 订阅节点, type: select, include-all: true, filter: "(?i)订阅"}  # 包含“订阅”等关键词的节点
 
   # 各地区节点的故障转移组，优先使用延迟最低可用节点
-  - {name: 🔯 香港故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(港|hk|hongkong|hong kong)"}
-  - {name: 🔯 日本故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(日本|jp|japan)"}
-  - {name: 🔯 狮城故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(新加坡|狮城|SG|Singapore)"}
-  - {name: 🔯 台湾故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(台|TW|Taiwan)"}
-  - {name: 🔯 韩国故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(韩|KR|Korea|首尔)"}
-  - {name: 🔯 美国故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(美|us|unitedstates|united states)"}
+  - {name: 🔯 香港故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|基础|V0|0.8倍|2倍)).*(港|hk|hongkong|hong kong)"}
+  - {name: 🔯 日本故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|基础|V0|2倍)).*(日本|jp|japan)"}
+  - {name: 🔯 狮城故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|基础|V0|2倍)).*(新加坡|狮城|SG|Singapore)"}
+  - {name: 🔯 台湾故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|基础|V0|2倍)).*(台|TW|Taiwan)"}
+  - {name: 🔯 韩国故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|基础|V0)).*(韩|KR|Korea|首尔)"}
+  - {name: 🔯 美国故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|基础|V0|2倍)).*(美|us|unitedstates|united states)"}
 
   # 视频平台专用容灾（奈飞、DMM等）
-  - {name: 🔯 视频故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|高级)).*(NF|奈飞|解锁|Netflix|Media|DMM|流媒体)"}
+  - {name: 🔯 视频故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(境外|基础|高级|V0)).*(NF|奈飞|解锁|Netflix|Media|DMM|流媒体)"}
 
 
   # 香港均衡（普通 round-robin 轮询负载均衡，排除部分关键词）
   - {name: ♻️ 香港ECO均衡, type: load-balance, include-all: true, strategy: round-robin,
-     filter: "(?=.*(香港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美|高级|境外|1倍|2倍)).)*$"}
+     filter: "(?=.*(香港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美|境外|基础|1倍|2倍|V0)).)*$"}
 
   # 香港智能（基于lightgbm模型评估质量，自动选择稳定节点）
-  - {name: ♻️ 香港ECO智能, type: smart, uselightgbm: true, collectdata: true, include-all: true,
+  - {name: ♻️ 香港ECO智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
      policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
-     filter: "(?=.*(香港|HK|(?i)Hong))^((?!(高级|境外|台|日|韩|新|深|美|高级|境外|1倍|2倍)).)*$"}
+     filter: "(?=.*(香港|HK|(?i)Hong))^((?!(境外|台|日|韩|新|深|美|基础|1倍|2倍|V0)).)*$"}
 
-  - {name: ♻️ 香港普通智能, type: smart, uselightgbm: true, collectdata: true, include-all: true,
+  - {name: ♻️ 香港普通智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
      policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
-     filter: "(?=.*(香港|HK|(?i)Hong))^((?!(高级|境外|台|日|韩|新|深|美|高级|境外|0.8倍|2倍)).)*$"}
+     filter: "(?=.*(香港|HK|(?i)Hong))^((?!(境外|台|日|韩|新|深|美|基础|0.8倍|2倍|V0)).)*$"}
 
-  - {name: ♻️ 香港游戏智能, type: smart, uselightgbm: true, collectdata: true, include-all: true,
+  - {name: ♻️ 全球游戏智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
      policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
-     filter: "(?=.*(香港|HK|(?i)Hong))^((?!(高级|境外|台|日|韩|新|深|美|高级|境外|0.8倍)).)*$"}
+     filter: "(?=.*(游戏|(?i)GAME))^((?!(境外)).)*$"}
 
   # 日本、新加坡、美国普通智能组（同样基于 lightgbm 策略自动选择最优节点）
-  - {name: ♻️ 日本普通智能, type: smart, uselightgbm: true, collectdata: true, include-all: true,
+  - {name: ♻️ 日本普通智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
      policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
-     filter: "(?=.*(日本|JP|(?i)Japan))^((?!(高级|境外|港|台|韩|新|美|高级|境外)).)*$"}
+     filter: "(?=.*(日本|JP|(?i)Japan))^((?!(境外|港|台|韩|新|美|基础|V0)).)*$"}
 
-  - {name: ♻️ 狮城普通智能, type: smart, uselightgbm: true, collectdata: true, include-all: true,
+  - {name: ♻️ 狮城普通智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
      policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
-     filter: "(?=.*(新加坡|坡|狮城|SG|Singapore))^((?!(高级|境外|港|台|韩|日|美|高级|境外)).)*$"}
+     filter: "(?=.*(新加坡|坡|狮城|SG|Singapore))^((?!(境外|港|台|韩|日|美|基础|V0)).)*$"}
 
-  - {name: ♻️ 美国普通智能, type: smart, uselightgbm: true, collectdata: true, include-all: true,
+  - {name: ♻️ 台湾普通智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
      policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
-     filter: "(?=.*(美|加|US|(?i)States|America))^((?!(高级|境外|港|台|日|韩|新|高级|境外)).)*$"}
+     filter: "(?=.*(台|TW|Taiwan))^((?!(境外|港|新|韩|日|美|基础|V0)).)*$"}
+
+  - {name: ♻️ 韩国普通智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
+     policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
+     filter: "(?=.*(韩|KR|Korea|首尔))^((?!(境外|港|新|台|日|美|基础|V0)).)*$"}
+
+  - {name: ♻️ 美国普通智能, type: smart, uselightgbm: true, collectdata: false, include-all: true,
+     policy-priority: "高级:0.9;RPO:1.3", strategy: sticky-sessions, interval: 300,
+     filter: "(?=.*(美|加|US|(?i)States|America))^((?!(境外|港|台|日|韩|新|基础|V0)).)*$"}
 
 
 
@@ -263,11 +262,11 @@ rules:
   - RULE-SET,cn_ip,🎯 直连,no-resolve
   - RULE-SET,BanAD,🛑 广告拦截
   - RULE-SET,BanProgramAD,🍃 应用净化
-  - MATCH,🐟 漏网之鱼
   - IP-CIDR,192.168.0.0/16,直连,no-resolve
   - IP-CIDR,10.0.0.0/8,直连,no-resolve
   - IP-CIDR,172.16.0.0/12,直连,no-resolve
   - DOMAIN-SUFFIX,lan,直连
+  - MATCH,🐟 漏网之鱼
 
 # 规则集提供者
 rule-anchor:
