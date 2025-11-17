@@ -61,8 +61,6 @@ dns:
     - +.lan
     - +.local
     - geosite:cn
-    - +.ikaro.su
-
   default-nameserver:
     - 223.5.5.5
     - 223.6.6.6
@@ -91,7 +89,6 @@ sniffer:
     - "+.v2ex.com"  # 对该域名强制进行嗅探（即便其在 skip 列表中）
   skip-domain:
     - "+.baidu.com"  # 对该域名跳过嗅探处理
-    - "+.ikaro.su"  # 对该域名跳过嗅探处理
 
 # TUN 模块
 tun:
