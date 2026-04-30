@@ -1,8 +1,8 @@
 [custom]
 ;设置规则标志位
 
-ruleset=订阅更新,[]DOMAIN-SUFFIX,zodnext.com
-ruleset=订阅更新,[]IP-CIDR,47.76.218.52/32
+ruleset=订阅更新,DOMAIN-SUFFIX,zodnext.com
+ruleset=订阅更新,IP-CIDR,47.76.218.52/32
 ruleset=全球直连,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Download.list
 ruleset=全球直连,https://raw.githubusercontent.com/Kochisa/Clash-Proxy-rule/main/Ruleset/UnRay.list
 ruleset=全球直连,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
